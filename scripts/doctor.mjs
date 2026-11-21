@@ -46,20 +46,8 @@ try {
   check('diagram', CIBA_APPROVAL_STEP_DETAILS.length === 71, `${CIBA_APPROVAL_STEP_DETAILS.length} steps (contract: 71)`);
 } catch (e) { check('diagram', false, e.message); }
 
-// Rule 17: the studio overview is diagram-studio/1 data, vendored byte for byte with a sha256 pin.
-try {
-  const pinText = fs.readFileSync(path.join(root, 'web/src/studio-data/studio-data.sha256'), 'utf8');
-  const pins = pinText.split('\n').map((l) => l.trim()).filter((l) => /^[0-9a-f]{64}\s/.test(l));
-  let ok = pins.length > 0; const bad = [];
-  for (const pin of pins) {
-    const [h, f] = pin.split(/\s+/);
-    const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, path.dirname('web/src/studio-data/x'), path.basename(f)))).digest('hex');
-    if (actual !== h) { ok = false; bad.push(path.basename(f)); }
-  }
-  const studio = JSON.parse(fs.readFileSync(path.join(root, 'web/src/studio-data/pfl-ciba-flow.json'), 'utf8'));
-  if (studio.schema !== 'diagram-studio/1') { ok = false; bad.push('schema'); }
-  check('studio-data', ok, ok ? `diagram-studio/1 (${studio.nodes.length} nodes, ${studio.edges.length} edges, pinned)` : `MISMATCH: ${bad.join(', ')}`);
-} catch (e) { check('studio-data', false, e.message); }
+// Rule 17: the studio overview was removed (owner decision 2026-11-21 — it did not match the
+// sequence story). No studio-data check; the sequence itself is the one diagram this lab ships.
 
 // Vendored pins (rules 22 / 24): every pin file matches the files it names.
 const pins = [

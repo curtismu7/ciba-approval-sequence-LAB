@@ -8,7 +8,6 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import SequenceFlowDiagram from "./SequenceFlowDiagram.jsx";
-import StudioOverview from "./StudioOverview.jsx";
 import { getDiagram } from "../api";
 
 export default function FlowTab() {
@@ -28,7 +27,6 @@ export default function FlowTab() {
         person approves on another device. Click any message or lifeline box for the wire detail, the decoded
         tokens and the standards behind that step.
       </p>
-      <StudioOverview />
       <SequenceFlowDiagram
         source={diagram.source}
         label="CIBA approval sequence"
