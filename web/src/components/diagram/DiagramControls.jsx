@@ -193,6 +193,15 @@ function DiagramControls({
               )}
               <button
                 type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--step"
+                onClick={then(".dc-ctrl-btn--resume", onNext)}
+                disabled={currentStep >= totalSteps}
+                title="Stop the auto-advance and wait on this step"
+              >
+                Step →
+              </button>
+              <button
+                type="button"
                 className="dc-ctrl-btn dc-ctrl-btn--next"
                 onClick={onNext}
                 disabled={currentStep >= totalSteps}

@@ -81,6 +81,21 @@ describe("§8f walkthrough controls", () => {
     expect(await screen.findByText(/Simulate walks the 71 arrows in order/i)).toBeTruthy();
   });
 
+  it("Step or Next while PLAYING pauses the walkthrough and waits for the next press (owner 2026-11-21)", async () => {
+    const user = userEvent.setup();
+    await renderDiagram(71);
+    // Start playing.
+    await user.click(await within(await seqBarEl()).findByRole("button", { name: "Simulate" }));
+    expect(within(await seqBarEl()).getByRole("button", { name: "Pause" })).toBeTruthy();
+    // Pressing Next mid-play stops auto-advance: the button swaps back to Resume.
+    await user.click(await within(await seqBarEl()).findByRole("button", { name: "Next →" }));
+    expect(within(await seqBarEl()).getByRole("button", { name: "Resume" })).toBeTruthy();
+    // Play again, then Step → also pauses instead of racing the timer.
+    await user.click(within(await seqBarEl()).getByRole("button", { name: "Resume" }));
+    await user.click(await within(await seqBarEl()).findByRole("button", { name: "Step →" }));
+    expect(within(await seqBarEl()).getByRole("button", { name: "Resume" })).toBeTruthy();
+  });
+
   it("Reset (the bar's own) clears the walkthrough and re-fits the diagram", async () => {
     const user = userEvent.setup();
     await renderDiagram(71);

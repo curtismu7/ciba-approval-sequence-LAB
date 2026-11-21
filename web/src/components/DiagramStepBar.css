@@ -87,3 +87,13 @@
   outline: 3px solid var(--th-focus-ring);
   outline-offset: 2px;
 }
+
+/* Sticky: the tall sequence scrolls for many screens; the controls float over the top so
+   Prev/Next stay reachable (owner, 2026-11-21). Bars inside the React Flow canvas (external
+   panels) are not sticky — only the page-level card. */
+.dstep-bar {
+  position: sticky;
+  top: 8px;
+  z-index: 30; /* above the React Flow edges/nodes, below dialogs */
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--th-shadow, #000) 22%, transparent);
+}

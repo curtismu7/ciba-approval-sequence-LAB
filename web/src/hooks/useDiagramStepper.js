@@ -39,9 +39,19 @@ export function useDiagramStepper(total) {
     setPaused(false);
   }, [step, last]);
   // §8f (owner, 2026-11-21): Next/Prev from a fresh diagram start the walkthrough PAUSED at the first
-  // step, so a viewer can step without playing. From an active walkthrough they just move one step.
-  const next = useCallback(() => setStep((s) => (s < 0 ? (setPaused(true), 0) : Math.min(s + 1, last))), [last]);
-  const prev = useCallback(() => setStep((s) => (s < 0 ? (setPaused(true), 0) : Math.max(s - 1, 0))), []);
+  // step, so a viewer can step without playing. From an active walkthrough they just move one step —
+  // and pressing Step or Prev while the walkthrough is PLAYING pauses it there and waits for the
+  // next press (owner, 2026-11-21: manual stepping always stops auto-advance).
+  const next = useCallback(() => setStep((s) => {
+    if (s < 0) { setPaused(true); return 0; }
+    setPaused(true);
+    return Math.min(s + 1, last);
+  }), [last]);
+  const prev = useCallback(() => setStep((s) => {
+    if (s < 0) { setPaused(true); return 0; }
+    setPaused(true);
+    return Math.max(s - 1, 0);
+  }), []);
   // jump straight to a step (a click on the movie reel) and stop auto-advance there
   const goTo = useCallback(
     (i) => {
