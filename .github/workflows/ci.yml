@@ -24,7 +24,7 @@ jobs:
       - run: npm ci
       - run: npm test
       # A spare port: the local container may hold 7834 on this runner.
-      - run: PORT=7839 npm run doctor
+      - run: CIBALAB_ALLOW_SPARE_PORT=1 PORT=7839 npm run doctor
 
   build:
     runs-on: ubuntu-latest

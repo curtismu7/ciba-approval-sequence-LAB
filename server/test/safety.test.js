@@ -19,6 +19,10 @@ test('safety: port is 7834 and forbidden ports refuse', () => {
   assert.ok(portProblem(8080));
   assert.ok(portProblem(4000));
   assert.ok(portProblem(7660));
+  // CI scratch runs may take a spare port, but only through the explicit opt-in.
+  assert.equal(portProblem(7839, { CIBALAB_ALLOW_SPARE_PORT: '1' }), null);
+  assert.ok(portProblem(7839, {}));
+  assert.ok(portProblem(7839, { CIBALAB_ALLOW_SPARE_PORT: '0' }));
 });
 
 test('Host check rejects foreign hosts with 403', async () => {

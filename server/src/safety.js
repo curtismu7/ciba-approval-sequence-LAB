@@ -18,15 +18,18 @@ export function assertBindAllowed(host, env = process.env) {
 
 export const DEFAULT_PORT = 7834;
 const FORBIDDEN_PORTS = new Set([8080, 5173, 3900, 4000, 4400, 4510, 4600, 4601, 4840, 18080, 19080, 19090]);
-export function portProblem(port) {
+export function portProblem(port, env = process.env) {
   if (!Number.isInteger(port)) return 'PORT is not an integer';
   if (FORBIDDEN_PORTS.has(port)) return `port ${port} is reserved for something else`;
+  // CI (and any scratch run) may drive the server on a spare port; the check
+  // exists so a misconfigured deploy does not silently answer on the wrong one.
+  if (env.CIBALAB_ALLOW_SPARE_PORT === '1') return null;
   if (port !== DEFAULT_PORT) return `port ${port} is not this lab's port (${DEFAULT_PORT})`;
   return null;
 }
 export function resolvePort(env = process.env) {
   const port = env.PORT === undefined || env.PORT === '' ? DEFAULT_PORT : Number(env.PORT);
-  const problem = portProblem(port);
+  const problem = portProblem(port, env);
   if (problem) throw new Error(problem);
   return port;
 }
