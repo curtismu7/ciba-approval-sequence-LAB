@@ -21,7 +21,7 @@ const source = (n) => {
 const DIAGRAM = (n) => ({ schema: "ciba-approval-sequence/1", source: source(n), participants: { a: "Alice's role", b: "Bob's role" }, bands: 3, messages: n, payloads: [], steps: [] });
 
 const renderDiagram = async (n = 71) => {
-  vi.stubGlobal("fetch", vi.fn(async (url) => (url === "/api/diagram"
+  vi.stubGlobal("fetch", vi.fn(async (url) => (url === "api/diagram"
     ? { ok: true, status: 200, json: async () => DIAGRAM(n) }
     : { ok: false, status: 404, json: async () => ({}) })));
   render(<FlowTab />);

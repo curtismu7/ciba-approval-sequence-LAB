@@ -31,7 +31,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("simulation banner (rule 2)", () => {
   it("is present and names what is simulated", async () => {
-    stubFetch({ "GET /api/info": INFO, "GET /api/diagram": DIAGRAM });
+    stubFetch({ "GET api/info": INFO, "GET api/diagram": DIAGRAM });
     render(<App />);
     const banner = await screen.findByTestId("banner");
     expect(banner.textContent).toMatch(/SIMULATED/i);
@@ -50,9 +50,9 @@ describe("Mock/Real toggle (rule 19)", () => {
   it("calls POST /api/mode with exactly { source } and reloads the data after the switch", async () => {
     let source = "mock";
     const calls = stubFetch({
-      "GET /api/info": () => ({ mode: source, source, simulated: true, realAvailable: true, version: "0.1.0" }),
-      "GET /api/diagram": DIAGRAM,
-      "POST /api/mode": (b) => {
+      "GET api/info": () => ({ mode: source, source, simulated: true, realAvailable: true, version: "0.1.0" }),
+      "GET api/diagram": DIAGRAM,
+      "POST api/mode": (b) => {
         expect(b).toEqual({ source: "real" }); // exactly { source }
         source = b.source;
         return { source };
@@ -64,15 +64,15 @@ describe("Mock/Real toggle (rule 19)", () => {
     const toggle = await screen.findByTestId("mode-select");
     await waitFor(() => expect(toggle).toHaveValue("mock"));
     await userEvent.selectOptions(toggle, "real");
-    await waitFor(() => expect(calls.some((c) => c.path === "/api/mode" && c.method === "POST")).toBe(true));
+    await waitFor(() => expect(calls.some((c) => c.path === "api/mode" && c.method === "POST")).toBe(true));
     await waitFor(() => expect(reload).toHaveBeenCalled());
   });
 
   it("a 409 from POST /api/mode (Real lost its configuration between load and switch) surfaces the server's detail and the badge stays Mock", async () => {
     stubFetch({
-      "GET /api/info": { ...INFO, realAvailable: true },
-      "GET /api/diagram": DIAGRAM,
-      "POST /api/mode": { status: 409, body: { error: "real_not_configured", detail: "Real mode needs REAL_CIBA_ENV_ID (owner-run). Mock keeps working." } },
+      "GET api/info": { ...INFO, realAvailable: true },
+      "GET api/diagram": DIAGRAM,
+      "POST api/mode": { status: 409, body: { error: "real_not_configured", detail: "Real mode needs REAL_CIBA_ENV_ID (owner-run). Mock keeps working." } },
     });
     render(<App />);
     const toggle = await screen.findByTestId("mode-select");
@@ -83,13 +83,13 @@ describe("Mock/Real toggle (rule 19)", () => {
   });
 
   it("when realAvailable is false the Real option is disabled, carries the how-to tooltip, and switching never reaches the server", async () => {
-    const calls = stubFetch({ "GET /api/info": INFO, "GET /api/diagram": DIAGRAM });
+    const calls = stubFetch({ "GET api/info": INFO, "GET api/diagram": DIAGRAM });
     render(<App />);
     const toggle = await screen.findByTestId("mode-select");
     const real = toggle.querySelector('option[value="real"]');
     await waitFor(() => expect(real).toBeDisabled());
     expect(real.title).toMatch(/REAL_CIBA_ENV_ID/);
     await userEvent.selectOptions(toggle, "real");
-    expect(calls.some((c) => c.path === "/api/mode")).toBe(false);
+    expect(calls.some((c) => c.path === "api/mode")).toBe(false);
   });
 });
