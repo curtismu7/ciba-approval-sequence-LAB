@@ -122,6 +122,7 @@ function Inner() {
   return (
     <section className="studio" aria-label="CIBA overview diagram (diagram-studio)">
       <div className="studio-bar" role="toolbar" aria-label="CIBA overview controls" data-testid="studio-step-bar" role="toolbar">
+        {/* ui-pattern: allow P9 this toolbar's Simulate is deliberately unstyled: the view's red primary is the dc-ctrl-btn--simulate button in DiagramControls, which the checker does not read as .primary; two red Simulates in one view state would be the drift */}
         <button type="button" onClick={simulate} disabled={playing && !paused}>Simulate</button>
         {playing && !paused
           ? <button type="button" onClick={() => setPaused(true)}>Pause</button>
