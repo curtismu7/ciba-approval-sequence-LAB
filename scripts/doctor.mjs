@@ -46,8 +46,9 @@ try {
   check('diagram', CIBA_APPROVAL_STEP_DETAILS.length === 71, `${CIBA_APPROVAL_STEP_DETAILS.length} steps (contract: 71)`);
 } catch (e) { check('diagram', false, e.message); }
 
-// Rule 17: the studio overview was removed (owner decision 2026-11-21 — it did not match the
-// sequence story). No studio-data check; the sequence itself is the one diagram this lab ships.
+// Rule 17: the diagram-studio overview was removed (owner decision 2026-11-21 — it did not
+// match the sequence story). No studio-data check; the 71-message sequence itself is the one
+// diagram this lab ships, rendered per rule 5 (React Flow, Simulate, Reset, speed control).
 
 // Vendored pins (rules 22 / 24): every pin file matches the files it names.
 const pins = [
