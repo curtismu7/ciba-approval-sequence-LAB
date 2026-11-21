@@ -1,0 +1,29 @@
+# OrbStack:  docker compose up --build -d   ->  http://127.0.0.1:7834
+# The server binds 0.0.0.0 INSIDE the container (CIBALAB_BIND is the opt-in), but the port is published on loopback only.
+# Do not change the 127.0.0.1 below. The .env beside this file (rule 121/26) holds the owner-only Real-mode settings.
+name: ciba-approval-sequence-lab
+
+services:
+  ciba-approval-sequence-lab:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7834:7834"
+    environment:
+      SHELF_URL: ${SHELF_URL:-https://local.ping-devops.com:8443/demo-shelf}
+      PORT: "7834"
+      CIBALAB_BIND: 0.0.0.0
+      LAB_ALLOWED_HOSTS: ${LAB_ALLOWED_HOSTS:-ciba-approval-sequence-lab.local.ping-devops.com}
+      REAL_CIBA_ENV_ID: ${REAL_CIBA_ENV_ID:-}
+      REAL_CIBA_CLIENT_ID: ${REAL_CIBA_CLIENT_ID:-}
+      REAL_CIBA_CLIENT_SECRET: ${REAL_CIBA_CLIENT_SECRET:-}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:7834/api/health').then(r=>r.json()).then(j=>process.exit(j.schema==='demo-health/1'&&j.state==='ready'?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      start_period: 5s
+      start_interval: 2s
+      timeout: 5s
+      retries: 3

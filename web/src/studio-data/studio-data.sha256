@@ -1,0 +1,5 @@
+# Studio data vendored byte for byte, never hand-edited (rule 17). pfl-ciba-flow.json is the diagram-studio repo's
+# PFL_CIBA_FLOW (core/src/apps.js, id pfl-ciba), exported as JSON.stringify(flow, null, 2) plus a newline, from the
+# AI-DEMO-Standalone standalone/diagram-studio-LAB checkout. Re-vendor (never edit), then re-pin:
+#   shasum -a 256 web/src/studio-data/pfl-ciba-flow.json
+e33f0dd731de23a9dd8a66d2713ee9a07dce4dc9c171740b742beb37b55c80fa  web/src/studio-data/pfl-ciba-flow.json

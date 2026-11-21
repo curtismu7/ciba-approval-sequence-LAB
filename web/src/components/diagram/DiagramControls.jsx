@@ -1,0 +1,232 @@
+/**
+ * DiagramControls — shared toolbar for diagram pages.
+ *
+ * Renders a horizontal toolbar with two optional, independent blocks:
+ *   - Zoom block: shown when `zoom` prop is provided
+ *   - Step nav block: shown when `currentStep` prop is provided
+ *
+ * The step nav block optionally includes:
+ *   - a step-time selector (shown when `stepTimeOptions` is provided)
+ *   - a Reset button (shown when `onReset` is provided)
+ *
+ * An optional `extra` node is rendered to the left of the zoom block
+ * (e.g. a scenario dropdown, a title chip).
+ */
+import { memo, useEffect, useRef } from "react";
+import StepTimeSelector from "./StepTimeSelector";
+import "./DiagramControls.css";
+
+/**
+ * Canonical per-step timing options shared by every simulate-capable diagram
+ * page. Values are the dwell time per step, in milliseconds.
+ */
+export const STEP_TIME_OPTIONS = [
+  { value: 800, label: "0.8s (fast)" },
+  { value: 1500, label: "1.5s" },
+  { value: 2500, label: "2.5s (default)" },
+  { value: 4000, label: "4s" },
+  { value: 6000, label: "6s (slow)" },
+];
+
+export const DEFAULT_STEP_MS = 2500;
+
+function DiagramControls({
+  // Zoom block (omit to hide)
+  zoom,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
+  zoomMin = 0.5,
+  zoomMax = 4.0,
+  zoomStep = 0.25,
+
+  // Step nav block (omit to hide)
+  currentStep,
+  totalSteps,
+  isSimulating = false,
+  isPaused = false,
+  onSimulate,
+  onPrev,
+  onPause,
+  onResume,
+  onNext,
+  onStop,
+
+  // Step-time selector (omit `stepTimeOptions` to hide)
+  stepTimeOptions,
+  stepMs,
+  onSetStepMs,
+
+  // Reset button (omit `onReset` to hide)
+  onReset,
+
+  // Extra content rendered left of zoom block
+  extra,
+}) {
+  // Simulate, Pause, Resume and Stop each swap themselves for a different button, which drops keyboard focus to
+  // <body>. A press records which control takes over; once the swap renders, focus moves to it.
+  const barRef = useRef(null);
+  const focusNext = useRef(null);
+  useEffect(() => {
+    const sel = focusNext.current;
+    focusNext.current = null;
+    if (sel) barRef.current?.querySelector(sel)?.focus({ preventScroll: true });
+  }, [isSimulating, isPaused]);
+  const then = (sel, fn) => (e) => {
+    focusNext.current = sel;
+    fn?.(e);
+  };
+
+  const hasZoom = zoom !== undefined && zoom !== null;
+  const hasStep = currentStep !== undefined && currentStep !== null;
+
+  const zoomPct = hasZoom ? Math.round(zoom * 100) : null;
+  const canZoomOut = hasZoom && zoom > zoomMin + 0.001;
+  const canZoomIn  = hasZoom && zoom < zoomMax - 0.001;
+
+  return (
+    <div className="dc-toolbar" ref={barRef}>
+      {extra}
+
+      {extra && (hasZoom || hasStep) && <div className="dc-divider" />}
+
+      {/* Zoom block */}
+      {hasZoom && (
+        <>
+          <button
+            type="button"
+            className="dc-zoom-btn"
+            onClick={onZoomOut}
+            disabled={!canZoomOut}
+            title="Zoom out"
+          >
+            −
+          </button>
+          <span className="dc-zoom-label">{zoomPct}%</span>
+          <button
+            type="button"
+            className="dc-zoom-btn"
+            onClick={onZoomIn}
+            disabled={!canZoomIn}
+            title="Zoom in"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="dc-zoom-btn dc-zoom-reset"
+            onClick={onZoomReset}
+            title="Reset zoom"
+          >
+            ↺
+          </button>
+        </>
+      )}
+
+      {hasZoom && hasStep && <div className="dc-divider" />}
+
+      {/* Step nav block */}
+      {hasStep && (
+        <>
+          <StepTimeSelector
+            value={stepMs}
+            options={stepTimeOptions}
+            onChange={onSetStepMs}
+            disabled={isSimulating}
+            title="Time each step takes during Simulate"
+          />
+          {!isSimulating ? (
+            <>
+              {/* §8f (owner, 2026-11-21): a walkthrough can start stepped, not only playing — Prev/Next from a
+                  fresh diagram start it paused at the first step (the handlers own that; see useDiagramStepper). */}
+              <button
+                type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--prev"
+                onClick={then(".dc-ctrl-btn--pause", onPrev)}
+                disabled={totalSteps < 2}
+              >
+                ← Prev
+              </button>
+              <button
+                type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--simulate"
+                onClick={then(".dc-ctrl-btn--pause", onSimulate)}
+              >
+                Simulate
+              </button>
+              <button
+                type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--step"
+                onClick={then(".dc-ctrl-btn--pause", onNext)}
+                disabled={totalSteps < 1}
+                title="Start the walkthrough paused on step 1"
+              >
+                Step →
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--prev"
+                onClick={onPrev}
+                disabled={currentStep <= 1}
+              >
+                ← Prev
+              </button>
+              {!isPaused ? (
+                <button
+                  type="button"
+                  className="dc-ctrl-btn dc-ctrl-btn--pause"
+                  onClick={then(".dc-ctrl-btn--resume", onPause)}
+                >
+                  Pause
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="dc-ctrl-btn dc-ctrl-btn--resume"
+                  onClick={then(".dc-ctrl-btn--pause", onResume)}
+                >
+                  Resume
+                </button>
+              )}
+              <button
+                type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--next"
+                onClick={onNext}
+                disabled={currentStep >= totalSteps}
+              >
+                Next →
+              </button>
+              <button
+                type="button"
+                className="dc-ctrl-btn dc-ctrl-btn--stop"
+                onClick={then(".dc-ctrl-btn--simulate", onStop)}
+              >
+                Stop
+              </button>
+            </>
+          )}
+          {onReset && (
+            <button
+              type="button"
+              className="dc-ctrl-btn dc-ctrl-btn--reset"
+              onClick={onReset}
+              title="Reset the diagram and clear history"
+            >
+              ↺ Reset
+            </button>
+          )}
+          <span
+            className={`dc-step-label${isPaused ? " dc-step-label--paused" : ""}`}
+          >
+            Step {currentStep} / {totalSteps}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default memo(DiagramControls);

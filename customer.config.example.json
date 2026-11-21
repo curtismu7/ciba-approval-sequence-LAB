@@ -1,0 +1,4 @@
+{
+  "_readme": "Copy to customer.config.json (git-ignored) to brand the lab. Reserved for later steps (branding and vocabulary); everything is currently ignored except this file existing.",
+  "brand": { "name": "CIBA Approval Sequence LAB" }
+}

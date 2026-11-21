@@ -1,0 +1,28 @@
+{
+  "name": "ciba-approval-sequence-lab",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "The CIBA out-of-band approval flow as a clickable 71-message sequence diagram: ten lifelines, three phases (search, a held booking write needing approval, replay + polling). Mock only; no tenant, no outbound network.",
+  "license": "MIT",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "start": "npm start -w server",
+    "build": "npm run build -w web",
+    "test": "npm test -w server && npm test -w web && node scripts/repo.test.mjs && node scripts/check-token-decode.mjs && sh scripts/check-ui-standard.sh",
+    "doctor": "node scripts/doctor.mjs",
+    "reset": "node scripts/reset.mjs",
+    "talk-track": "node scripts/build-talk-track.mjs",
+    "content-pack": "node scripts/build-content-pack.mjs && node scripts/validate-content-pack.mjs",
+    "conformance": "node test/kit/demo-kit-conformance.mjs . --new --tier=Demo"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0"
+  }
+}

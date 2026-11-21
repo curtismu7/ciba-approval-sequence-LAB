@@ -1,0 +1,72 @@
+* { box-sizing: border-box; }
+html { font-size: var(--fs, 16px); }
+body { margin: 0; background: var(--th-bg-page); color: var(--th-text); font-family: var(--font-sans); font-size: var(--font-size-base); }
+code { font-family: var(--font-mono); font-size: var(--font-size-2xs); }
+/* Shell bar (STANDALONE-UI-PATTERNS.md section 1): Core Dark in both themes, Ping Red gradient rule, full-bleed (the -16px
+   cancels the body gutter); wraps at 600px. position: relative anchors the TopMenu sign-in slot. */
+.shell-bar { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin: 0 -16px; padding: 10px 20px;
+  background: var(--box-dark); color: var(--on-box); border-bottom: 3px solid transparent; border-image: var(--accent-gradient) 1; }
+.shell-bar h1 { margin: 0; color: var(--on-box); font-size: var(--font-size-lg); }
+.shell-brand { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.02em; }
+.shell-logo { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 4px; border-radius: var(--radius-sm); background: var(--accent-gradient); color: var(--on-accent); font: 800 var(--font-size-xs) var(--font-mono); }
+.shell-badge { padding: 2px 8px; border-radius: var(--radius-pill); border: 1px solid transparent; background: var(--accent-gradient); color: var(--on-accent); font: 700 var(--font-size-xs) var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.shell-badge--real { background: var(--surface-2); color: var(--status-warn); border-color: var(--status-warn); }
+.shell-nav { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 12rem; }
+.shell-nav a { padding: 5px 12px; border-radius: var(--radius-pill); border: 1px solid transparent; color: var(--on-box); text-decoration: none; font-size: var(--font-size-sm); font-weight: 500; white-space: nowrap; }
+.shell-nav a:hover { border-color: var(--on-box); }
+.shell-nav a[aria-current="page"] { background: var(--accent-gradient); color: var(--on-accent); font-weight: 600; }
+.shell-bar .shell-right { margin-left: auto; } /* TopMenu renders .top-menu.shell-right; its own layout stays */
+/* The shell bar's focus ring clears 3:1 on the Core Dark ground (C1). */
+.shell-bar :focus-visible { outline: 3px solid var(--on-box); outline-offset: 2px; }
+@media (max-width: 600px) { .shell-bar { gap: 10px; padding: 10px 16px; } .shell-nav { order: 3; flex-basis: 100%; } }
+/* Page frame (section 3): one centred column (the sequence is wide), the simulation banner is its first child. */
+body { padding: 0 16px; }
+.page { max-width: 2200px; margin: 0 auto; padding: 12px 0 32px; }
+.banner { margin: 0 0 12px; padding: 8px 16px; font-size: var(--font-size-sm); color: var(--th-status-warning-text); background: var(--th-status-warning-bg); border: 1px solid var(--th-status-warning); border-radius: var(--radius-md); }
+.page > .intro { margin: 0 0 12px; }
+.intro { margin: 0; max-width: 78ch; color: var(--th-text-muted); font-size: var(--font-size-sm); line-height: 1.45; }
+.app-error { padding: 16px; color: var(--th-deny-text); }
+button { font: inherit; font-size: var(--font-size-sm); padding: 6px 12px; border-radius: var(--btn-radius); border: 1px solid var(--th-border-strong); background: var(--th-bg-card); color: var(--th-text); cursor: pointer; }
+button:not(.primary):hover { background: var(--th-bg-hover); }
+button:focus-visible { outline: 2px solid var(--th-status-info); outline-offset: 2px; }
+select { font: inherit; font-size: var(--font-size-sm); color: var(--th-text); background: var(--th-bg-card); border: 1px solid var(--th-border-strong); border-radius: var(--radius-md); padding: 6px 8px; }
+select:focus-visible { outline: 2px solid var(--th-status-info); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { color: var(--th-text-muted); font-size: var(--font-size-sm); }
+.field-error { color: var(--th-deny-text); background: var(--th-deny-bg); border: 1px solid var(--th-deny); border-radius: var(--radius-md); padding: 6px 10px; font-size: var(--font-size-sm); }
+details { margin: 6px 0; } summary { cursor: pointer; font-size: var(--font-size-sm); font-weight: 600; }
+/* Talk track (pattern 8d.1 content, simple list form: this lab's track is short). */
+.talk { padding-left: 22px; max-width: 80ch; } .talk h2 { font-size: var(--font-size-lg); margin: 14px 0 4px; } .talk p { margin: 0; line-height: 1.55; }
+.presenter-say { border: 1px solid var(--th-status-info); background: var(--th-status-info-bg); border-radius: var(--radius-md); padding: 8px 14px; margin-bottom: 12px; }
+.presenter-say p { margin: 4px 0; line-height: 1.5; }
+.app--presenter { font-size: 18px; } .app--presenter .talk p { font-size: var(--font-size-lg); line-height: 1.55; }
+/* Theme tokens the diagram files read, aliased from the shared standard tokens (T1: no colour literals here). */
+:root {
+  --th-bg-page: var(--bg);
+  --th-bg-card: var(--surface);
+  --th-bg-inset: var(--surface-2);
+  --th-bg-hover: color-mix(in srgb, var(--text) 6%, var(--surface));
+  --th-text: var(--text);
+  --th-text-muted: var(--muted);
+  --th-border: var(--border);
+  --th-border-strong: var(--border);
+  --th-status-info: var(--status-info);
+  --th-status-info-text: color-mix(in srgb, var(--status-info) 80%, var(--text));
+  --th-status-info-bg: color-mix(in srgb, var(--status-info) 8%, var(--surface));
+  --th-status-warning: var(--status-warn);
+  --th-status-warning-text: color-mix(in srgb, var(--status-warn) 70%, var(--text));
+  --th-status-warning-bg: color-mix(in srgb, var(--status-warn) 12%, var(--surface));
+  --th-status-error: var(--danger-text);
+  --th-status-error-text: var(--danger-text);
+  --th-status-error-bg: color-mix(in srgb, var(--danger-text) 8%, var(--surface));
+  --th-deny-text: var(--danger-text);
+  --th-deny-bg: color-mix(in srgb, var(--danger-text) 10%, var(--surface));
+  --th-deny: var(--danger-text);
+  --th-accent: var(--accent);
+  --th-focus-ring: var(--focus);
+  --th-text-faint: var(--muted);
+  --btn-accent: var(--accent);
+  --font-primary: var(--font-sans);
+  /* Fixed diagram-control colours the ported StepTimeSelector / DiagramControls CSS read (same in both themes). */
+  --control-border: var(--border);
+}

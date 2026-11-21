@@ -1,0 +1,25 @@
+{
+  "demos": [
+    {
+      "id": "ciba-approval-sequence",
+      "name": "CIBA Approval Sequence LAB",
+      "kind": "Demo",
+      "description": "The CIBA out-of-band approval flow as a clickable 71-message sequence diagram: an AI agent books a flight, the booking write is held by PingOne Authorize until the person approves on another device (CIBA), then the call is replayed and polled. Ten lifelines, three phases, RFC 8693 token exchange on every hop. Mock only.",
+      "url": "http://localhost:7834",
+      "healthPath": "/api/health",
+      "composeFile": "ciba-approval-sequence-LAB/docker-compose.yml",
+      "composeOverlays": [],
+      "notes": "Host-run: npm start (port 7834). Mock only: no tenant, no credentials, no outbound network. Docker: docker compose up --build -d (published on 127.0.0.1 only). Diagram ported from the AI-DEMO2 banking demo's CIBA approval sequence page; origin identifiers scrubbed. Catalog id D119 (HITL, MFA & CIBA gate). Repo: curtismu7/ciba-approval-sequence-LAB.",
+      "tags": [
+        "ciba",
+        "oauth",
+        "human-in-the-loop",
+        "token-exchange"
+      ],
+      "catalogId": "D119",
+      "pingProducts": [],
+      "repo": "https://github.com/curtismu7/ciba-approval-sequence-LAB",
+      "where": "installed"
+    }
+  ]
+}
