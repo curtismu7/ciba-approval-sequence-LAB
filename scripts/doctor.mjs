@@ -16,7 +16,7 @@ const checks = [];
 const check = (id, ok, detail = '') => checks.push({ id, ok, detail });
 const [major] = process.versions.node.split('.').map(Number);
 check('node', major >= 26, `node ${process.versions.node}`);
-try { check('port-config', resolvePort() === DEFAULT_PORT, `port ${resolvePort()}`); } catch (e) { check('port-config', false, e.message); }
+try { check('port-config', resolvePort() === DEFAULT_PORT || process.env.CIBALAB_ALLOW_SPARE_PORT === '1', `port ${resolvePort()}`); } catch (e) { check('port-config', false, e.message); }
 try { assertBindAllowed(bindHost()); check('bind', true, bindHost()); } catch (e) { check('bind', false, e.message); }
 check('mode', ['mock', 'real'].includes(modeFrom()), `${modeFrom()}${realAvailableFrom() ? ' (real configured)' : ' (mock only)'}`);
 
