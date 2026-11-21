@@ -1,0 +1,169 @@
+# SE k8s mock-only deployment of ciba-approval-sequence-LAB (STANDALONE-RULES section 6).
+# Tokens (__IMAGE__, __SE_HOST__, __NAMESPACE__) are rendered by k8s/deploy.sh with sed; no
+# namespace is set here, the script passes -n. The app lives at /mock/ciba-approval-sequence on
+# the main host so the existing SE sign-in wall applies; the prefix is stripped, so the app sees
+# plain paths (LAB_ALLOWED_HOSTS is not needed: the app's host check accepts loopback names and
+# the kubelet's probes use the httpHeaders Host below).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ciba-approval-sequence-mock
+  labels: &labels
+    app.kubernetes.io/name: ciba-approval-sequence-mock
+    app.kubernetes.io/part-of: standalone-mock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ciba-approval-sequence-mock
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ciba-approval-sequence
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 7834
+          env:
+            - { name: MOCK_ONLY, value: "1" }
+            - { name: PORT, value: "7834" }
+            - { name: CIBALAB_BIND, value: "0.0.0.0" }
+            - { name: LAB_ALLOWED_HOSTS, value: "__SE_HOST__" }
+            # Session isolation (section 6): stateless in the mock build; the data dir is a
+            # per-pod temp dir nothing writes to (mockGuard refuses writes).
+            - { name: DATA_DIR, value: /tmp/cibalab }
+          # The host guard answers 403 to any Host it does not know, including the kubelet's
+          # pod-IP Host, so probes send the real one.
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - { name: Host, value: "__SE_HOST__" }
+            initialDelaySeconds: 3
+            periodSeconds: 15
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - { name: Host, value: "__SE_HOST__" }
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 25m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ciba-approval-sequence-mock
+  labels:
+    app.kubernetes.io/name: ciba-approval-sequence-mock
+    app.kubernetes.io/part-of: standalone-mock
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ciba-approval-sequence-mock
+  ports:
+    - { name: http, port: 7834, targetPort: http }
+---
+# The app lives at a path on the main host so the existing SE sign-in wall applies. The wall
+# annotations (auth-url, auth-signin, ssl-redirect) are copied from ingress diagram-studio-mock.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ciba-approval-sequence-mock
+  labels:
+    app.kubernetes.io/name: ciba-approval-sequence-mock
+    app.kubernetes.io/part-of: standalone-mock
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: http://frontend.__NAMESPACE__.svc.cluster.local:4000/api/auth/hosted-access/check
+    nginx.ingress.kubernetes.io/auth-signin: https://__SE_HOST__/api/auth/hosted-access/login?return_to=$escaped_request_uri
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx-public
+  rules:
+    - host: __SE_HOST__
+      http:
+        paths:
+          - path: /mock/ciba-approval-sequence(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: ciba-approval-sequence-mock
+                port: { name: http }
+---
+# The bare path has no trailing slash, which would break relative asset URLs, so it is
+# redirected to the slash form. Exact match takes precedence over the rewrite ingress above.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ciba-approval-sequence-mock-slash
+  labels:
+    app.kubernetes.io/name: ciba-approval-sequence-mock
+    app.kubernetes.io/part-of: standalone-mock
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://__SE_HOST__/mock/ciba-approval-sequence/
+    nginx.ingress.kubernetes.io/permanent-redirect-code: "308"
+spec:
+  ingressClassName: nginx-public
+  rules:
+    - host: __SE_HOST__
+      http:
+        paths:
+          - path: /mock/ciba-approval-sequence
+            pathType: Exact
+            backend:
+              service:
+                name: ciba-approval-sequence-mock
+                port: { name: http }
+---
+# Health only, so the shelf can poll it without the sign-in wall. The page and the API stay behind the wall.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ciba-approval-sequence-mock-health
+  labels:
+    app.kubernetes.io/name: ciba-approval-sequence-mock
+    app.kubernetes.io/part-of: standalone-mock
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx-public
+  rules:
+    - host: __SE_HOST__
+      http:
+        paths:
+          - path: /mock/ciba-approval-sequence/api/health
+            pathType: Exact
+            backend:
+              service:
+                name: ciba-approval-sequence-mock
+                port: { name: http }

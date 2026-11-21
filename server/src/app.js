@@ -7,6 +7,7 @@ import express from 'express';
 import { hostCheck, sameOriginWrites } from './safety.js';
 import { createHealth } from './health.js';
 import { modeFrom, realAvailableFrom, REAL_MODE_VARS } from './config.js';
+import { mockGuard, isMockOnly } from './mockOnly.js';
 import { loadCast, verticalFrom, VERTICALS, fillDeep } from './cast.js';
 import { workspaceFrom } from './workspaces.js';
 import {
@@ -21,10 +22,14 @@ export async function createApp({ health = createHealth(), env = process.env } =
   // Rule 19: runtime server-side mode. Launch-derived (Real if configured, else Mock),
   // then changed only by POST /api/mode. A toggle that only echoes the launch mode does not meet the rule.
   let source = modeFrom(env);
+  // Hosted mock build (section 6): MOCK_ONLY=1 pins the mode to mock and refuses every write.
+  const mockOnly = isMockOnly(env);
+  if (mockOnly) source = 'mock';
   const app = express();
   app.disable('x-powered-by');
   app.use(hostCheck);
   app.use(sameOriginWrites);
+  if (mockOnly) app.use('/api', mockGuard);
   app.use((_req, res, next) => { res.set('X-Content-Type-Options', 'nosniff'); next(); });
 
   const api = express.Router();
@@ -64,19 +69,22 @@ export async function createApp({ health = createHealth(), env = process.env } =
   api.get('/info', (_req, res) => {
     res.set('Cache-Control', 'no-store');
     res.json({
-      mode: source, source, simulated: true, realAvailable: realAvailableFrom(env),
+      mode: source, source, simulated: true, realAvailable: mockOnly ? false : realAvailableFrom(env),
+      mockOnly, hosted: mockOnly,
       demo: { id: 'ciba-approval-sequence-lab', tier: 'Demo', port: 7834 },
       version: (() => { try { return JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version || null; } catch { return null; } })(),
     });
   });
 
-  // Rule 19: the Mock/Real toggle. Exactly { source: "mock"|"real" }; 409 when Real is not configured.
+  // Rule 19: the Mock/Real toggle. Exactly { source: "mock"|"real" }; 409 when Real is not
+  // configured, 403 in the hosted mock build (mockGuard already refused the POST).
   api.post('/mode', (req, res) => {
     const body = req.body;
     if (!body || typeof body !== 'object' || Array.isArray(body)
       || !['mock', 'real'].includes(body.source) || Object.keys(body).length !== 1) {
       return res.status(400).json({ error: 'bad_source', detail: 'body must be exactly { source: "mock" | "real" }' });
     }
+    if (mockOnly) return res.status(403).json({ error: 'mock_only', message: 'Disabled in the hosted mock.' });
     if (body.source === 'real' && !realAvailableFrom(env)) {
       return res.status(409).json({ error: 'real_not_configured', detail: `Real mode needs ${REAL_MODE_VARS.join(', ')} in the lab's .env beside docker-compose.yml (owner-run). Mock keeps working.` });
     }
