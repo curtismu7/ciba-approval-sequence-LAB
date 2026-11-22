@@ -107,3 +107,14 @@ sequence page and rewritten for this lab: origin-specific "this repo" implementa
 file references were generalized to public product/RFC behaviour, all identifiers were scrubbed,
 and no code was imported across repos. The overview diagram is the diagram-studio repo's own
 `pfl-ciba` flow (vendored, pinned).
+
+## Postman & MCP
+
+Prefer raw API calls or an agent? This lab's flow has two companions:
+
+- **Postman:** [`ciba-backchannel/`](https://github.com/curtismu7/ping-postman-packages) in
+  `curtismu7/ping-postman-packages` — the real CIBA flow (`bc-authorize` → approval → token
+  polling → refusals) against a real PingFederate/PingOne CIBA client. This lab is the offline
+  wire-shape story; the collection is the real thing.
+- **MCP:** the `ciba_run` tool of [`ping-provisioning-mcp-LAB`](https://github.com/curtismu7/ping-provisioning-mcp-LAB)
+  drives one full CIBA flow and narrates every hop.
