@@ -93,6 +93,15 @@ npm start                 # http://127.0.0.1:7834/
 
 Workspace id `default` (header `X-Workspace`) is reserved for per-visitor data in later steps.
 
+## Postman collection
+
+`postman/ciba-approval-sequence-lab.postman_collection.json` covers the read surface (health, info, talk track, approval-sequence diagram) and the Mock/Real toggle's unconfigured 409 refusal. It needs no environment.
+
+```
+node ../../shared/postman/generator.mjs --spec postman/spec.json            # regenerate (never hand-edit the output)
+npx newman run postman/ciba-approval-sequence-lab.postman_collection.json
+```
+
 ## How the Mock/Real toggle works
 
 The header toggle calls `POST /api/mode` with exactly `{ source }` and reloads the page's data.
