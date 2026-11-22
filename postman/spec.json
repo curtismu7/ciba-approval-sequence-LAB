@@ -1,0 +1,38 @@
+{
+  "name": "CIBA Approval Sequence LAB",
+  "slug": "ciba-approval-sequence-lab",
+  "description": "API collection for CIBA Approval Sequence LAB: the lab's read surface (talk track, approval-sequence diagram) plus the Mock/Real toggle and its unconfigured refusal. The sequence itself is rendered from data; the lab's mock lane is a labelled simulation.",
+  "baseUrl": "http://localhost:7834",
+  "env": {},
+  "folders": [
+    {
+      "name": "Sanity (mock, labelled)",
+      "description": "Health and mode info (mock by default; Real is owner-run).",
+      "requests": [
+        { "name": "Health", "method": "GET", "path": "/api/health",
+          "tests": ["pm.response.to.have.status(200);", "pm.expect(pm.response.json().state).to.eql('ready');"] },
+        { "name": "Info (mode is mock by default)", "method": "GET", "path": "/api/info",
+          "tests": ["pm.response.to.have.status(200);", "pm.expect(pm.response.json().mode).to.eql('mock');"] }
+      ]
+    },
+    {
+      "name": "Story data",
+      "description": "The talk track and the approval-sequence diagram the page renders.",
+      "requests": [
+        { "name": "Talk track", "method": "GET", "path": "/api/talk-track",
+          "tests": ["pm.response.to.have.status(200);", "pm.expect(pm.response.json().talk.length).to.be.above(0);"] },
+        { "name": "Approval sequence diagram", "method": "GET", "path": "/api/diagram",
+          "tests": ["pm.response.to.have.status(200);", "pm.expect(pm.response.json()).to.have.property('source');"] }
+      ]
+    },
+    {
+      "name": "Mode toggle",
+      "description": "The Mock/Real toggle. Real needs owner-run settings (REAL_CIBA_*); without them it answers 409 with what is missing — that refusal is the negative case here.",
+      "requests": [
+        { "name": "Switch to Real without settings (negative, 409 with detail)", "method": "POST", "path": "/api/mode",
+          "body": { "source": "real" },
+          "tests": ["pm.expect(pm.response.code).to.eql(409);", "pm.expect(pm.response.json()).to.have.property('detail');"] }
+      ]
+    }
+  ]
+}
