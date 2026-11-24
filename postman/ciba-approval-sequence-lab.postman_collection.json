@@ -3,7 +3,7 @@
     "name": "CIBA Approval Sequence LAB",
     "description": "API collection for CIBA Approval Sequence LAB: the lab's read surface (talk track, approval-sequence diagram) plus the Mock/Real toggle and its unconfigured refusal. The sequence itself is rendered from data; the lab's mock lane is a labelled simulation.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_postman_id": "90ef7dc7-6212-497a-8431-735388b7fe5e"
+    "_postman_id": "postman-ciba-approval-sequence-lab"
   },
   "item": [
     {
@@ -18,9 +18,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().state).to.eql('ready');"
+                  "pm.test(\"Health\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().state).to.eql('ready');",
+                  "});"
                 ]
               }
             }
@@ -50,9 +51,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().mode).to.eql('mock');"
+                  "pm.test(\"Info (mode is mock by default)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().mode).to.eql('mock');",
+                  "});"
                 ]
               }
             }
@@ -88,9 +90,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().talk.length).to.be.above(0);"
+                  "pm.test(\"Talk track\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().talk.length).to.be.above(0);",
+                  "});"
                 ]
               }
             }
@@ -120,9 +123,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json()).to.have.property('source');"
+                  "pm.test(\"Approval sequence diagram\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.have.property('source');",
+                  "});"
                 ]
               }
             }
@@ -158,9 +162,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.expect(pm.response.code).to.eql(409);",
-                  "pm.expect(pm.response.json()).to.have.property('detail');"
+                  "pm.test(\"Switch to Real without settings (negative, 409 with detail)\", function () {",
+                  "  pm.expect(pm.response.code).to.eql(409);",
+                  "  pm.expect(pm.response.json()).to.have.property('detail');",
+                  "});"
                 ]
               }
             }

@@ -89,6 +89,7 @@ export default function App() {
           ))}
         </nav>
         <TopMenu
+          postman={{ repo: "curtismu7/ciba-approval-sequence-LAB", slug: "ciba-approval-sequence-lab" }}
           mode={{ value: real ? "real" : "mock", onChange: async (target) => {
             if (real === (target === "real")) return;
             const res = await setMode(target).catch(() => ({ ok: false, body: {} }));
