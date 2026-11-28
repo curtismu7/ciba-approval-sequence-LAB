@@ -38,9 +38,10 @@ export default function App() {
   const [fontStep, setFontStep] = useState(() => { try { const f = window.localStorage.getItem("cibalab.font"); return ["S", "M", "L"].includes(f) ? f : "M"; } catch { return "M"; } });
   const [notice, setNotice] = useState("");
   const [talk, setTalk] = useState(TALK); // the raw data until the server answers with the cast-filled text
+  const [brand, setBrand] = useState(""); // the cast brand of the story (AirGuard Airlines by default), from /api/talk-track
 
   useEffect(() => { getInfo().then(setInfo, (e) => { setInfo(null); setError(e.message); }); }, []);
-  useEffect(() => { getTalkTrack().then((j) => setTalk(j.talk || TALK), () => setTalk(TALK)); }, []);
+  useEffect(() => { getTalkTrack().then((j) => { setTalk(j.talk || TALK); setBrand(typeof j.cast?.castBrand === "string" ? j.cast.castBrand : ""); }, () => setTalk(TALK)); }, []);
   useEffect(() => {
     const on = () => setTab(hashParts());
     window.addEventListener("hashchange", on);
@@ -80,6 +81,7 @@ export default function App() {
         <span className="shell-brand">
           <span className="shell-logo" aria-hidden="true">CA</span>
           <h1>CIBA Approval Sequence Lab</h1>
+          {brand && <span className="shell-cast" data-testid="cast-brand">{brand}</span>}
           <span className={`shell-badge${real ? " shell-badge--real" : ""}`} data-testid="mode-badge">{real ? "Real" : "Mock"}</span>
         </span>
         <nav className="shell-nav" aria-label="Lab sections">

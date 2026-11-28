@@ -1,4 +1,12 @@
 {
-  "_readme": "Copy to customer.config.json (git-ignored) to brand the lab. Reserved for later steps (branding and vocabulary); everything is currently ignored except this file existing.",
-  "brand": { "name": "CIBA Approval Sequence LAB" }
+  "_readme": "Copy to customer.config.json (git-ignored) to brand the lab. The default story is AirGuard Airlines (the airlines vertical pack: passenger-chat-agent, host airguard); a cast block overrides the pack's brand, agentId, clientId and host. The other packs (retail, health, finance) are picked with ?vertical=.",
+  "brand": {
+    "name": "CIBA Approval Sequence LAB"
+  },
+  "cast": {
+    "brand": "AirGuard Airlines",
+    "agentId": "passenger-chat-agent",
+    "clientId": "passenger-chat-agent",
+    "host": "airguard"
+  }
 }

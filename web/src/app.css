@@ -10,6 +10,7 @@ code { font-family: var(--font-mono); font-size: var(--font-size-2xs); }
 .shell-brand  { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.02em; }
 .shell-logo { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 4px; border-radius: var(--radius-sm); background: var(--accent-gradient); color: var(--on-accent); font: 800 var(--font-size-xs) var(--font-mono); }
 .shell-badge { padding: 2px 8px; border-radius: var(--radius-pill); border: 1px solid transparent; background: var(--accent-gradient); color: var(--on-accent); font: 700 var(--font-size-xs) var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.shell-cast { font: 600 var(--font-size-sm) var(--font-sans, inherit); color: var(--text-muted, inherit); overflow-wrap: anywhere; }
 .shell-badge--real { background: var(--surface-2); color: var(--status-warn); border-color: var(--status-warn); }
 .shell-nav { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 12rem; }
 .shell-nav a { padding: 5px 12px; border-radius: var(--radius-pill); border: 1px solid transparent; color: var(--on-box); text-decoration: none; font-size: var(--font-size-sm); font-weight: 500; white-space: nowrap; }
