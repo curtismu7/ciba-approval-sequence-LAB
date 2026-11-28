@@ -26,7 +26,7 @@ step 2.
   web/src/talkTrack.js), doctor (`npm run doctor`: node, port, bind, mode, compose restart policy,
   71-step contract, studio data, vendored pins, info contract), CI (.github/workflows/ci.yml,
   Node 26 only, vendored gate `test/kit/demo-kit-conformance.mjs`), cast templating
-  (server/src/cast.js, 3 vertical packs, customer.config.json override; a test fails on an
+  (server/src/cast.js, 4 vertical packs (airlines is the default: AirGuard Airlines), customer.config.json override; a test fails on an
   undefined token), and the vendored diagram-studio flow web/src/studio-data/ (rule 17, pinned).
   The conformance gate must stay 0 FAIL: `npm run conformance`. The diagram renderer is ported from the family reference
   (read-only source; never import across repos). Vendored, byte-pinned, never hand-edited:

@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.2.0 (unreleased)
+- AirGuard Airlines (a fictional airline) is the default story: a fourth `airlines` vertical pack (brand AirGuard Airlines, agent passenger-chat-agent, host airguard) is the default, so the brand matches the flight-booking diagram; retail, health and finance stay selectable with `?vertical=` or a customer config. The header shows the cast brand. Retired brands are guarded by a test.
 - Step 3 (integration): shelf entry (`docs/shelf-entry.json`, catalog D119), Learning Hub content pack (`content-pack.json`, built from the CIBA step data by `npm run content-pack`), talk track as data (`web/src/talkTrack.js`) with `docs/talk-track.md` generated from it, presenter-mode verification with the banner visible, doctor extended (compose restart policy, 71-step contract, vendored pins, studio data, port free/occupied-by-this-app, info contract), CI on GitHub-hosted runners (Node 26: tests, build, conformance gate, gitleaks, forbidden strings, no-AI-attribution), cast templating with three vertical packs (rule 10) and `GET /api/talk-track`, the diagram-studio `pfl-ciba` overview vendored and pinned (rule 17), and two step-2 fixes: the netguard dead import removed, and canvas edge labels now take the click (React Flow writes `pointer-events: all` inline on every node, so the click-through is set inline on the non-interactive nodes too).
 
 ## 0.1.0

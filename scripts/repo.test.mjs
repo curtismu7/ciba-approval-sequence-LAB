@@ -48,10 +48,12 @@ test('docs/talk-track.md is exactly what the web talk-track data renders (no dri
   assert.doesNotMatch(app, /say-first/);
 });
 
-test('the cast: three vertical packs, every {{cast}} token defined, customer.config values are bounded', async () => {
+test('the cast: four vertical packs (airlines is the default), every {{cast}} token defined, customer.config values are bounded', async () => {
   const castMod = await import(pathToFileUrl(path.join(root, 'server/src/cast.js')));
   const { TALK } = await import(pathToFileUrl(path.join(root, 'web/src/talkTrack.js')));
-  assert.deepEqual(Object.keys(castMod.VERTICALS).sort(), ['finance', 'health', 'retail']);
+  assert.deepEqual(Object.keys(castMod.VERTICALS).sort(), ['airlines', 'finance', 'health', 'retail']);
+  assert.equal(castMod.DEFAULT_VERTICAL, 'airlines');
+  assert.equal(castMod.loadCast(null).castBrand, 'AirGuard Airlines', 'a fresh run with no config is AirGuard Airlines');
   for (const v of Object.keys(castMod.VERTICALS)) {
     const cast = castMod.loadCast(null, v);
     assert.deepEqual(castMod.unfilled(TALK.map((t) => t.say).join(' '), cast), [], v);
@@ -66,6 +68,30 @@ test('the cast: three vertical packs, every {{cast}} token defined, customer.con
   assert.ok(cast.castBrand.length <= 40, 'brand bounded');
   assert.ok(cast.castAgentId.length <= 40, 'agentId bounded');
   assert.equal(cast.castHost, 'fabrikam', 'bad host keeps the pack default');
+});
+
+test('an unknown or older vertical id keeps working: unknown falls back to airlines, finance/retail/health render their own brand', async () => {
+  const castMod = await import(pathToFileUrl(path.join(root, 'server/src/cast.js')));
+  assert.equal(castMod.verticalFrom('nonsense'), 'airlines');
+  assert.equal(castMod.verticalFrom(undefined), 'airlines');
+  assert.equal(castMod.verticalFrom('__proto__'), 'airlines');
+  assert.equal(castMod.loadCast(null, castMod.verticalFrom('nonsense')).castBrand, 'AirGuard Airlines');
+  assert.equal(castMod.loadCast(null, 'finance').castBrand, 'Fabrikam Bank');
+  assert.equal(castMod.loadCast(null, 'retail').castBrand, 'Northwind Retail');
+  assert.equal(castMod.loadCast(null, 'health').castBrand, 'Contoso Health');
+});
+
+test('retired names: the airline run (cast, filled talk track, diagram data, content pack, generated doc) names no earlier brand', async () => {
+  const castMod = await import(pathToFileUrl(path.join(root, 'server/src/cast.js')));
+  const { TALK } = await import(pathToFileUrl(path.join(root, 'web/src/talkTrack.js')));
+  const diagram = await import(pathToFileUrl(path.join(root, 'server/src/data/cibaApprovalSequence.js')));
+  const cast = castMod.loadCast(null, 'airlines');
+  const rendered = JSON.stringify({ cast, talk: castMod.fillDeep(TALK, cast), diagram: Object.fromEntries(Object.entries(diagram)) })
+    + read('content-pack.json') + read('docs/talk-track.md');
+  const retired = ['Meridian Air', 'Meridian Journeys', 'Skyline Air', 'Northwind', 'Contoso', 'Tessera Travel', 'Fabrikam', 'Harbor', 'Vellum', 'payments-agent', 'orders-agent', 'claims-agent'];
+  for (const name of retired) assert.ok(!rendered.toLowerCase().includes(name.toLowerCase()), `retired name in the airline run: ${name}`);
+  assert.match(rendered, /AirGuard Airlines/);
+  assert.match(rendered, /passenger-chat-agent/);
 });
 
 test('content-pack.json is exactly what the builder makes (no drift)', async () => {

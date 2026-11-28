@@ -15,8 +15,8 @@ a poll loop with an inner alt, and a closing alt. Catalog id D119 (HITL, MFA & C
 - The 71-message sequence is the one diagram (owner decision 2026-11-21: a compact
   diagram-studio overview was removed because it did not match the sequence story). It renders
   per the family diagram rules: React Flow, Simulate / Prev / Next, Reset, speed control.
-- The story is templated (rule 10): three vertical packs (retail / health / finance) name the
-  brand, agent and host; `customer.config.json` (git-ignored, see `customer.config.example.json`)
+- The story is templated (rule 10): four vertical packs (airlines / retail / health / finance, airlines is the default: AirGuard
+  Airlines, a fictional airline) name the brand, agent and host; `customer.config.json` (git-ignored, see `customer.config.example.json`)
   can override the cast.
 
 ## What is simulated vs what would be real

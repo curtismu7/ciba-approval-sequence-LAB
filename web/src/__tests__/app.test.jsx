@@ -46,6 +46,21 @@ describe("simulation banner (rule 2)", () => {
   });
 });
 
+describe("the story brand", () => {
+  it("shows the cast brand the server picked (AirGuard Airlines by default) and no brand while it is unknown", async () => {
+    stubFetch({ "GET api/info": INFO, "GET api/diagram": DIAGRAM, "GET api/talk-track": { talk: [], cast: { castBrand: "AirGuard Airlines" } } });
+    render(<App />);
+    expect((await screen.findByTestId("cast-brand")).textContent).toBe("AirGuard Airlines");
+  });
+
+  it("shows no brand chip when the talk track cannot be loaded", async () => {
+    stubFetch({ "GET api/info": INFO, "GET api/diagram": DIAGRAM });
+    render(<App />);
+    await screen.findByTestId("banner");
+    expect(screen.queryByTestId("cast-brand")).toBeNull();
+  });
+});
+
 describe("Mock/Real toggle (rule 19)", () => {
   it("calls POST /api/mode with exactly { source } and reloads the data after the switch", async () => {
     let source = "mock";

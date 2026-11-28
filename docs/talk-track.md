@@ -4,7 +4,7 @@
 
 ## The one-line version
 
-A person asks payments-agent, Fabrikam Bank's AI agent, to book a flight. Writing the booking is a sensitive action, so the policy engine holds it and demands an out-of-band approval: the CIBA flow. The person approves on another device, the agent replays the same call with the approval, and the booking goes through.
+A person asks passenger-chat-agent, the AI agent at AirGuard Airlines, to book a flight. Writing the booking is a sensitive action, so the policy engine holds it and demands an out-of-band approval: the CIBA flow. The person approves on another device, the agent replays the same call with the approval, and the booking goes through.
 
 ## Three phases
 
@@ -20,4 +20,4 @@ A push approval on a second device is stronger than anything in-channel: the app
 
 ## The poll loop
 
-The gateway holds the agent's call open and polls the authorization server every two seconds: authorization_pending means keep waiting, slow_down means back off, and a final deny or expiry ends the held call with a clear error payments-agent can explain. The model never approves; it only reports the outcome.
+The gateway holds the agent's call open and polls the authorization server every two seconds: authorization_pending means keep waiting, slow_down means back off, and a final deny or expiry ends the held call with a clear error passenger-chat-agent can explain. The model never approves; it only reports the outcome.
