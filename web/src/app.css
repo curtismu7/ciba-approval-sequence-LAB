@@ -19,10 +19,9 @@ code { font-family: var(--font-mono); font-size: var(--font-size-2xs); }
 /* The shell bar's focus ring clears 3:1 on the Core Dark ground (C1). */
 .shell-bar :focus-visible { outline: 3px solid var(--on-box); outline-offset: 2px; }
 @media (max-width: 600px) { .shell-bar { gap: 10px; padding: 10px 16px; } .shell-nav { order: 3; flex-basis: 100%; } }
-/* Page frame (section 3): one centred column (the sequence is wide), the simulation banner is its first child. */
+/* Page frame (section 3): one centred column (the sequence is wide). */
 body { padding: 0 16px; }
 .page { max-width: 2200px; margin: 0 auto; padding: 12px 0 32px; }
-.banner { margin: 0 0 12px; padding: 8px 16px; font-size: var(--font-size-sm); color: var(--th-status-warning-text); background: var(--th-status-warning-bg); border: 1px solid var(--th-status-warning); border-radius: var(--radius-md); }
 .page > .intro { margin: 0 0 12px; }
 .intro { margin: 0; max-width: 78ch; color: var(--th-text-muted); font-size: var(--font-size-sm); line-height: 1.45; }
 .app-error { padding: 16px; color: var(--th-deny-text); }

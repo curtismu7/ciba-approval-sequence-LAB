@@ -1,10 +1,10 @@
-// App tests: the shell behaviours the rules require — the simulation banner (rule 2) and the
+// App tests: the shell behaviours the rules require — the Real-or-mock modal (rule 2, amended 2026-11-28; it replaced the simulation banner) and the
 // Mock/Real toggle (rule 19: POST /api/mode with exactly { source }, 409 surfaced, Real disabled
 // with a how-to tooltip when realAvailable=false, data reload on success).
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import App, { BANNER_UNKNOWN, bannerFor } from "../App.jsx";
+import App, { MODE_LINES } from "../App.jsx";
 
 // FlowTab fetches the 71-message diagram; jsdom fetch is stubbed per test.
 function stubFetch(routes) {
@@ -26,23 +26,76 @@ function stubFetch(routes) {
 const INFO = { mode: "mock", source: "mock", simulated: true, realAvailable: false, version: "0.1.0" };
 const DIAGRAM = { schema: "ciba-approval-sequence/1", source: "sequenceDiagram\n", participants: {}, bands: 3, messages: 71, payloads: [], steps: [] };
 
-beforeEach(() => { window.localStorage.clear(); });
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+beforeEach(() => { window.localStorage.clear(); window.sessionStorage.clear(); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); window.sessionStorage.clear(); });
 
-describe("simulation banner (rule 2)", () => {
-  it("is present and names what is simulated", async () => {
+describe("Real-or-mock modal (rule 2)", () => {
+  it("opens on MOCK with what is simulated, and there is no banner", async () => {
     stubFetch({ "GET api/info": INFO, "GET api/diagram": DIAGRAM });
     render(<App />);
-    const banner = await screen.findByTestId("banner");
-    expect(banner.textContent).toMatch(/SIMULATED/i);
-    expect(banner.textContent).toMatch(/mock tokens/i);
+    const modal = await screen.findByTestId("mode-modal");
+    await waitFor(() => expect(modal.textContent).toMatch(/mock tokens/i));
+    expect(modal).toHaveAttribute("data-mode", "mock");
+    expect(modal.textContent).toMatch(/MOCK/);
+    expect(modal.textContent).toMatch(/Simulated:/);
+    expect(modal.textContent).toMatch(/mock approval service and a mock flight API/i);
+    expect(modal.textContent).toMatch(/No real identity provider, gateway or API is called/);
+    expect(modal.textContent).toMatch(/model, not live traffic/);
+    expect(screen.queryByTestId("banner")).toBeNull();
+    expect(document.querySelector(".banner")).toBeNull();
   });
 
-  it("reacts to the mode from /api/info: Real mode names what is real vs simulated", () => {
-    expect(bannerFor({ ...INFO, source: "real", mode: "real" })).toMatch(/REAL MODE/i);
-    expect(bannerFor({ ...INFO, source: "real", mode: "real" })).toMatch(/modelled sequence/i);
-    expect(bannerFor(null)).toBe(BANNER_UNKNOWN);
-    expect(bannerFor(INFO)).toMatch(/mock tokens/i);
+  it("Got it closes it and a remount in the same session does not bring it back", async () => {
+    stubFetch({ "GET api/info": INFO, "GET api/diagram": DIAGRAM });
+    const first = render(<App />);
+    await userEvent.click(await screen.findByTestId("mode-modal-ok"));
+    expect(screen.queryByTestId("mode-modal")).toBeNull();
+    first.unmount();
+    render(<App />);
+    await screen.findByTestId("mode-select");
+    expect(screen.queryByTestId("mode-modal")).toBeNull();
+  });
+
+  it("Real mode from /api/info shows REAL and names what is still modelled", async () => {
+    stubFetch({ "GET api/info": { ...INFO, source: "real", mode: "real", realAvailable: true }, "GET api/diagram": DIAGRAM });
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId("mode-modal")).toHaveAttribute("data-mode", "real"));
+    const modal = screen.getByTestId("mode-modal");
+    expect(modal.textContent).toMatch(/REAL/);
+    expect(modal.textContent).toMatch(/owner-configured on the server/);
+    expect(modal.textContent).toMatch(/still the modelled sequence with its example wire data/);
+    expect(modal.textContent).toMatch(/model, not live traffic/);
+  });
+
+  it("Real-on-load race: holds /api/info, shows MOCK (unknown line), then REAL once it answers, even though MOCK was dismissed", async () => {
+    let release;
+    const gate = new Promise((r) => { release = r; });
+    stubFetch({
+      "GET api/info": async () => { await gate; return { ...INFO, source: "real", mode: "real", realAvailable: true }; },
+      "GET api/diagram": DIAGRAM,
+    });
+    render(<App />);
+    const mock = await screen.findByTestId("mode-modal");
+    expect(mock).toHaveAttribute("data-mode", "mock");
+    await userEvent.click(screen.getByTestId("mode-modal-ok"));
+    expect(screen.queryByTestId("mode-modal")).toBeNull();
+    release();
+    await waitFor(() => expect(screen.getByTestId("mode-modal")).toHaveAttribute("data-mode", "real"));
+  });
+
+  it("while /api/info has not answered, or failed, the modal says MOCK with the unknown line (simulated, or a hosted simulation)", async () => {
+    stubFetch({ "GET api/diagram": DIAGRAM }); // api/info answers 404: the load failed
+    render(<App />);
+    await screen.findByRole("alert");
+    const modal = screen.getByTestId("mode-modal");
+    expect(modal).toHaveAttribute("data-mode", "mock");
+    expect(modal.textContent).toMatch(/Simulated, or a hosted simulation/);
+    expect(modal.textContent).toMatch(/mock approval service and a mock flight API/);
+    expect(modal.textContent).toMatch(/model, not live traffic/);
+  });
+
+  it("each state has its own non-empty line, and every one says the lifelines are a model", () => {
+    for (const k of ["mock", "real", "unknown"]) { expect(MODE_LINES[k].length).toBeGreaterThan(40); expect(MODE_LINES[k]).toMatch(/model, not live traffic/); }
   });
 });
 

@@ -53,6 +53,7 @@ try {
 // Vendored pins (rules 22 / 24): every pin file matches the files it names.
 const pins = [
   ['web/src/top-menu/top-menu.sha256', ['TopMenu.jsx', 'top-menu.css'].map((f) => `web/src/top-menu/${f}`)],
+  ['web/src/mode-modal/mode-modal.sha256', ['ModeModal.jsx', 'mode-modal.css'].map((f) => `web/src/mode-modal/${f}`)],
   ['web/src/components/JsonPane.sha256', ['JsonPane.jsx'].map((f) => `web/src/components/${f}`)],
   ['web/src/components/JsonPane.css.sha256', ['JsonPane.css'].map((f) => `web/src/components/${f}`)],
 ];

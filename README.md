@@ -84,7 +84,7 @@ npm start                 # http://127.0.0.1:7834/
 ## API
 
 - `GET /api/health` — `demo-health/1`.
-- `GET /api/info` — `{ source, realAvailable, simulated, ... }` for the mode banner and toggle.
+- `GET /api/info` — `{ source, realAvailable, simulated, ... }` for the mode modal and toggle.
 - `POST /api/mode` — exactly `{ source: "mock" | "real" }`; 409 `real_not_configured` when Real is not configured.
 - `GET /api/diagram` — the full CIBA sequence data: the sequence source, participants, bands,
   frames, notes, and per-message step details (71 entries), plus the cast and verticals.
