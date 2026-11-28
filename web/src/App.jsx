@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import FlowTab from "./components/FlowTab.jsx";
 import TalkTrack from "./components/TalkTrack.jsx";
 import TopMenu, { applyFontSize } from "./top-menu/TopMenu";
+import ModeModal from "./mode-modal/ModeModal.jsx";
 import { getInfo, getTalkTrack, resetLab, setMode } from "./api";
 import { TALK } from "./talkTrack";
 
@@ -10,16 +11,13 @@ export const TABS = [
   { id: "talk", label: "Talk track" },
 ];
 
-// The banner is never blank and never claims a mode before it knows: until /api/info answers (or if it fails)
-// it says both, honestly. In Real mode (owner-configured server-side) the banner names what is real vs simulated.
-const TAIL = "No real identity provider, gateway or API is called by this lab; the ten lifelines are a model, not live traffic.";
-export const BANNER_UNKNOWN = `SIMULATED / HOSTED SIMULATION: mock tokens, a mock approval service and a mock flight API. ${TAIL}`;
-export const bannerFor = (info) => {
-  if (!info) return BANNER_UNKNOWN;
-  if (info.source === "real" || info.mode === "real") {
-    return `REAL MODE: Real-mode connections (if any) are owner-configured on the server; everything shown here is still the modelled sequence with its example wire data. ${TAIL}`;
-  }
-  return `SIMULATED: mock tokens (teaching values only), a mock approval service and a mock flight API. ${TAIL}`;
+// The Real-or-mock modal (shared mode-modal) replaces the old simulation banner. It reads MOCK until /api/info answers, then REAL if the lab is in
+// Real. Three states keep what the banner said: mock, real (what is still modelled), and unknown (info not answered or failed: says both, honestly).
+const MODEL = "The ten lifelines are a model, not live traffic.";
+export const MODE_LINES = {
+  mock: `Simulated: mock tokens (teaching values only), a mock approval service and a mock flight API. No real identity provider, gateway or API is called. ${MODEL}`,
+  real: `Any real connections are owner-configured on the server; everything shown here is still the modelled sequence with its example wire data. ${MODEL}`,
+  unknown: `Simulated, or a hosted simulation: mock tokens, a mock approval service and a mock flight API. No real identity provider, gateway or API is called. ${MODEL}`,
 };
 
 const THEMES = ["auto", "light", "dark"];
@@ -105,7 +103,6 @@ export default function App() {
         />
       </header>
       <main className="page">
-        <p className="banner" role="status" data-testid="banner">{bannerFor(info)}</p>
         {info === null && <p className="app-error" role="alert">Could not load the lab ({error}). Is the server running?</p>}
         <p className="sr-only" role="status" aria-live="polite">{notice}</p>
         <div id={`panel-${tab}`}>
@@ -113,6 +110,7 @@ export default function App() {
           {tab === "talk" && <TalkTrack talk={talk} />}
         </div>
       </main>
+      <ModeModal mode={real ? "real" : "mock"} lines={{ ...MODE_LINES, mock: info ? MODE_LINES.mock : MODE_LINES.unknown }} storageKey="cas-mode" />
     </div>
   );
 }
